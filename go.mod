@@ -5,8 +5,8 @@ go 1.24.0
 require (
 	github.com/charmbracelet/bubbletea v1.2.4
 	github.com/charmbracelet/lipgloss v1.0.0
-	github.com/ebitengine/oto/v3 v3.4.0
 	github.com/gen2brain/beeep v0.11.1
+	github.com/gen2brain/malgo v0.11.24
 	github.com/hajimehoshi/go-mp3 v0.3.4
 )
 
@@ -15,7 +15,6 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/x/ansi v0.4.5 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
-	github.com/ebitengine/purego v0.9.0 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/esiqveland/notify v0.13.3 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
