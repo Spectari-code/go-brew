@@ -8,8 +8,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/ebitengine/oto/v3"
 	"github.com/hajimehoshi/go-mp3"
-	"github.com/hajimehoshi/oto/v2"
 )
 
 //go:embed alert.mp3
@@ -43,7 +43,12 @@ func tryMP3Playback() error {
 		return err
 	}
 
-	otoCtx, ready, err := oto.NewContext(decoder.SampleRate(), 2, 2)
+	otoCtx, ready, err := oto.NewContext(&oto.NewContextOptions{
+		SampleRate:   decoder.SampleRate(),
+		ChannelCount: 2,
+		Format:       oto.FormatFloat32LE,
+		BufferSize:   0, // Use driver's default buffer size
+	})
 	if err != nil {
 		return err
 	}
