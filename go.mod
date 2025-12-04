@@ -1,6 +1,6 @@
 module github.com/Spectari-code/go-brew
 
-go 1.25.5
+go 1.24.0
 
 require (
 	github.com/charmbracelet/bubbletea v1.2.4
