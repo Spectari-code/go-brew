@@ -23,16 +23,16 @@ A professional CLI tea timer application built with Go and the Bubbletea TUI fra
 
 #### Go Install (Recommended)
 ```bash
-go install github.com/Spectari-code/go-brew-cli@latest
+go install github.com/Spectari-code/go-brew@latest
 ```
 
 #### Download Binary
-Download the appropriate binary for your platform from the [Releases](https://github.com/Spectari-code/go-brew-cli/releases) page.
+Download the appropriate binary for your platform from the [Releases](https://github.com/Spectari-code/go-brew/releases) page.
 
 #### Build from Source
 ```bash
-git clone https://github.com/Spectari-code/go-brew-cli.git
-cd go-brew-cli
+git clone https://github.com/Spectari-code/go-brew.git
+cd go-brew
 go build -o go-brew .
 ```
 
@@ -121,8 +121,8 @@ No environment variables are currently supported, but you can customize the expe
 
 ```bash
 # Clone the repository
-git clone https://github.com/Spectari-code/go-brew-cli.git
-cd go-brew-cli
+git clone https://github.com/Spectari-code/go-brew.git
+cd go-brew
 
 # Install dependencies
 go mod tidy
