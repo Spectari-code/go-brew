@@ -1,4 +1,4 @@
-module github.com/Spectari-code/go-brew-cli
+module github.com/Spectari-code/go-brew
 
 go 1.23.4
 

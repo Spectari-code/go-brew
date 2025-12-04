@@ -129,6 +129,118 @@ func TestUpdatePauseResume(t *testing.T) {
 	}
 }
 
+// TestCustomDurationPrecedence verifies that when a custom duration is set via command line,
+// it takes precedence over tea preset durations when starting the timer.
+func TestCustomDurationPrecedence(t *testing.T) {
+	config := NewConfig()
+	config.BrewTime = 2 * time.Minute  // Custom duration
+	config.CustomDuration = true       // Simulate -duration flag being used
+	mdl := initialModel(config)
+
+	// Start timer
+	newModel, _ := mdl.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")})
+	m, ok := newModel.(model)
+	if !ok {
+		t.Fatal("Failed to cast to model")
+	}
+
+	// Verify timer remains at custom duration (2 minutes), not preset duration
+	if m.timer != 2*time.Minute {
+		t.Errorf("Expected timer %v, got %v", 2*time.Minute, m.timer)
+	}
+}
+
+// TestCustomDurationReset verifies that custom duration is preserved when resetting timer.
+func TestCustomDurationReset(t *testing.T) {
+	config := NewConfig()
+	config.BrewTime = 3 * time.Minute  // Custom duration
+	config.CustomDuration = true       // Simulate -duration flag being used
+	mdl := initialModel(config)
+
+	// Start timer
+	mdl.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")})
+
+	// Reset timer
+	newModel, _ := mdl.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("r")})
+	m, ok := newModel.(model)
+	if !ok {
+		t.Fatal("Failed to cast to model")
+	}
+
+	// Verify custom duration is preserved after reset
+	if m.timer != 3*time.Minute {
+		t.Errorf("Expected timer %v, got %v", 3*time.Minute, m.timer)
+	}
+}
+
+// TestPresetNavigationWithCustomDuration verifies that when custom duration is set,
+// navigating through presets doesn't change the timer duration.
+func TestPresetNavigationWithCustomDuration(t *testing.T) {
+	config := NewConfig()
+	config.BrewTime = 5 * time.Minute  // Custom duration
+	config.CustomDuration = true       // Simulate -duration flag being used
+	mdl := initialModel(config)
+
+	// Navigate through presets
+	newModel, _ := mdl.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("up")})
+	mdl, _ = newModel.(model)
+	newModel, _ = mdl.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("down")})
+	m, _ := newModel.(model)
+
+	// Verify custom duration is preserved during preset navigation
+	if m.timer != 5*time.Minute {
+		t.Errorf("Expected timer %v, got %v", 5*time.Minute, m.timer)
+	}
+}
+
+// TestDefaultBehaviorWithoutCustomDuration verifies that when no custom duration is set,
+// the application behaves as before using preset durations.
+func TestDefaultBehaviorWithoutCustomDuration(t *testing.T) {
+	config := NewConfig()
+	config.BrewTime = DefaultBrewTime     // Use default
+	config.CustomDuration = false         // No custom duration
+	mdl := initialModel(config)
+
+	// Start timer
+	newModel, _ := mdl.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("s")})
+	m, ok := newModel.(model)
+	if !ok {
+		t.Fatal("Failed to cast to model")
+	}
+
+	// Verify timer uses preset duration, not config.BrewTime
+	expectedDuration := m.currentPreset().Duration
+	if m.timer != expectedDuration {
+		t.Errorf("Expected timer %v (preset), got %v", expectedDuration, m.timer)
+	}
+}
+
+// TestPresetNavigationWithoutCustomDuration verifies that preset navigation works
+// normally when no custom duration is set.
+func TestPresetNavigationWithoutCustomDuration(t *testing.T) {
+	config := NewConfig()
+	config.BrewTime = DefaultBrewTime     // Use default
+	config.CustomDuration = false         // No custom duration
+	mdl := initialModel(config)
+	originalPresetIdx := mdl.presetIdx
+
+	// Navigate to next preset
+	newModel, _ := mdl.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("down")})
+	m, ok := newModel.(model)
+	if !ok {
+		t.Fatal("Failed to cast to model")
+	}
+
+	// Verify preset changed and timer updated to new preset duration
+	if m.presetIdx == originalPresetIdx {
+		t.Error("Expected preset index to change")
+	}
+	expectedDuration := m.currentPreset().Duration
+	if m.timer != expectedDuration {
+		t.Errorf("Expected timer %v (new preset), got %v", expectedDuration, m.timer)
+	}
+}
+
 // contains is a helper function that checks if a substring exists within a string.
 // It uses a recursive approach for substring searching without relying on strings.Contains.
 func contains(s, substr string) bool {

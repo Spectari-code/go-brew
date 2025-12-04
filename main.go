@@ -24,9 +24,18 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	tea "github.com/charmbracelet/bubbletea"
+)
+
+// These variables are set by GoReleaser during build
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+	builtBy = "local"
 )
 
 // Init initializes the Bubbletea program with no initial commands.
@@ -35,12 +44,26 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
+// printVersion prints version information and exits
+func printVersion() {
+	fmt.Printf("go-brew %s\n", version)
+	fmt.Printf("Commit: %s\n", commit)
+	fmt.Printf("Built: %s\n", date)
+	fmt.Printf("Built by: %s\n", builtBy)
+}
+
 // main is the entry point of the Go Brew CLI application.
 // It sets up the configuration, validates it, and starts the Bubbletea TUI program.
 // The program runs in alternate screen mode for a full terminal experience.
 func main() {
 	config := NewConfig()
 	config.ParseFlags()
+
+	// Handle version flag
+	if config.ShowVersion {
+		printVersion()
+		return
+	}
 
 	// Validate configuration
 	if err := config.Validate(); err != nil {

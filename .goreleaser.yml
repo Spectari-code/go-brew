@@ -14,11 +14,18 @@ builds:
     goarch:
       - amd64
       - arm64
+      - 386
+    ignore:
+      - goos: darwin
+        goarch: 386
+      - goos: windows
+        goarch: arm64
     ldflags:
       - -s -w
       - -X main.version={{.Version}}
       - -X main.commit={{.Commit}}
       - -X main.date={{.Date}}
+      - -X main.builtBy=goreleaser
 
 archives:
   - format: tar.gz
@@ -32,15 +39,29 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
-
-changelog:
-  sort: asc
-  filters:
-    exclude:
-      - '^docs:'
-      - '^test:'
+    files:
+      - README.md
+      - LICENSE
 
 release:
   github:
     owner: Spectari-code
-    name: go-brew-cli
+    name: go-brew
+  draft: false
+  prerelease: auto
+  name_template: "{{.ProjectName}} v{{.Version}}"
+
+changelog:
+  sort: asc
+  use: github
+  groups:
+    - title: Features
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: Bug fixes
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 1
+
+checksum:
+  name_template: "{{.ProjectName}}_{{.Version}}_checksums.txt"
+  algorithm: sha256

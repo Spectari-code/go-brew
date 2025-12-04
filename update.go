@@ -42,11 +42,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.state != StateBrewing {
 				// If previously finished, reset to idle before starting fresh
 				if m.isFinished() {
-					m.timer = m.currentPreset().Duration
+					if m.config.CustomDuration {
+						m.timer = m.config.BrewTime  // Use custom duration
+					} else {
+						m.timer = m.currentPreset().Duration  // Use preset duration
+					}
 					m.state = StateIdle
 				}
-				// Set timer to current preset duration and start brewing
-				m.timer = m.currentPreset().Duration
+				// Set timer to custom duration or preset duration and start brewing
+				if m.config.CustomDuration {
+					m.timer = m.config.BrewTime  // Use custom duration
+				} else {
+					m.timer = m.currentPreset().Duration  // Use preset duration
+				}
 				m.state = StateBrewing
 				return m, tick() // Start the timer tick mechanism
 			}
@@ -60,8 +68,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tick()
 			}
 		case KeyReset:
-			// Reset timer to initial state with current preset duration
-			m.timer = m.currentPreset().Duration
+			// Reset timer to initial state with custom duration or preset duration
+			if m.config.CustomDuration {
+				m.timer = m.config.BrewTime  // Use custom duration
+			} else {
+				m.timer = m.currentPreset().Duration  // Use preset duration
+			}
 			m.state = StateIdle
 			return m, nil
 		case KeyUp:
@@ -69,14 +81,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.state == StateIdle {
 				// Use modulo arithmetic to wrap around the preset list
 				m.presetIdx = (m.presetIdx - 1 + len(m.config.Presets)) % len(m.config.Presets)
-				m.timer = m.currentPreset().Duration
+				// Only update timer if NOT using custom duration
+				if !m.config.CustomDuration {
+					m.timer = m.currentPreset().Duration
+				}
 			}
 			return m, nil
 		case KeyDown:
 			// Navigate to next preset (only allowed when idle)
 			if m.state == StateIdle {
 				m.presetIdx = (m.presetIdx + 1) % len(m.config.Presets)
-				m.timer = m.currentPreset().Duration
+				// Only update timer if NOT using custom duration
+				if !m.config.CustomDuration {
+					m.timer = m.currentPreset().Duration
+				}
 			}
 			return m, nil
 		}

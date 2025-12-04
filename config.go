@@ -77,11 +77,13 @@ var DefaultTeaPresets = []TeaPreset{
 // tea presets, key bindings, and preferences. It provides a centralized
 // location for all configurable aspects of the application.
 type Config struct {
-	BrewTime      time.Duration // Default brew time when no preset is selected
-	SoundEnabled  bool          // Whether to play audio alerts when tea is ready
-	NotifyEnabled bool          // Whether to show desktop notifications
-	KeyBindings   []KeyBinding  // List of keyboard shortcuts and their descriptions
-	Presets       []TeaPreset   // Available tea presets with their brewing parameters
+	BrewTime       time.Duration // Default brew time when no preset is selected
+	SoundEnabled   bool          // Whether to play audio alerts when tea is ready
+	NotifyEnabled  bool          // Whether to show desktop notifications
+	ShowVersion    bool          // Whether to show version information and exit
+	CustomDuration bool          // Whether custom duration was set via -duration flag
+	KeyBindings    []KeyBinding  // List of keyboard shortcuts and their descriptions
+	Presets        []TeaPreset   // Available tea presets with their brewing parameters
 }
 
 // NewConfig creates a new Config instance with sensible default values.
@@ -117,9 +119,17 @@ func (c *Config) Validate() error {
 }
 
 // ParseFlags parses command line flags and updates the configuration accordingly.
-// Currently supports the -duration flag for custom brew times.
+// Currently supports the -duration flag for custom brew times and -version flag.
 // This should be called after NewConfig() but before Validate().
 func (c *Config) ParseFlags() {
 	flag.DurationVar(&c.BrewTime, "duration", c.BrewTime, "brew time for the tea timer")
+	flag.BoolVar(&c.ShowVersion, "version", false, "show version information and exit")
 	flag.Parse()
+
+	// Check if duration flag was actually used by checking if it was provided in command line
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == "duration" {
+			c.CustomDuration = true
+		}
+	})
 }

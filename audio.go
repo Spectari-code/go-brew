@@ -1,8 +1,9 @@
 package main
 
 import (
+	"bytes"
+	_ "embed"
 	"log"
-	"os"
 	"os/exec"
 	"runtime"
 	"time"
@@ -11,9 +12,12 @@ import (
 	"github.com/hajimehoshi/oto/v2"
 )
 
+//go:embed alert.mp3
+var alertMP3Data []byte
+
 // playSound attempts to play an audio alert when the timer completes.
 // It implements a graceful degradation strategy with multiple fallback options:
-// 1. Primary: MP3 playback from alert.mp3 file
+// 1. Primary: MP3 playback from embedded alert.mp3 data
 // 2. Secondary: System-specific sound files
 // 3. Tertiary: Terminal bell character
 // This ensures users receive notification even on systems with limited audio capabilities.
@@ -29,18 +33,12 @@ func playSound() {
 	}()
 }
 
-// tryMP3Playback attempts to play the bundled MP3 alert file using pure Go libraries.
+// tryMP3Playback attempts to play the embedded MP3 alert file using pure Go libraries.
 // It uses go-mp3 for decoding and oto for cross-platform audio playback.
-// This method provides the best audio quality but requires the alert.mp3 file
-// to be present in the same directory as the executable.
+// This method provides the best audio quality and requires no external files.
 func tryMP3Playback() error {
-	file, err := os.Open("alert.mp3")
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	decoder, err := mp3.NewDecoder(file)
+	reader := bytes.NewReader(alertMP3Data)
+	decoder, err := mp3.NewDecoder(reader)
 	if err != nil {
 		return err
 	}
