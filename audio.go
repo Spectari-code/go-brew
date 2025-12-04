@@ -3,13 +3,12 @@ package main
 import (
 	"bytes"
 	_ "embed"
-	"io"
 	"log"
 	"os/exec"
 	"runtime"
 	"time"
 
-	"github.com/gen2brain/malgo"
+	"github.com/ebitengine/oto/v3"
 	"github.com/hajimehoshi/go-mp3"
 )
 
@@ -35,7 +34,7 @@ func playSound() {
 }
 
 // tryMP3Playback attempts to play the embedded MP3 alert file using pure Go libraries.
-// It uses go-mp3 for decoding and malgo for cross-platform audio playback.
+// It uses go-mp3 for decoding and oto for cross-platform audio playback.
 // This method provides the best audio quality and requires no external files.
 func tryMP3Playback() error {
 	reader := bytes.NewReader(alertMP3Data)
@@ -44,58 +43,25 @@ func tryMP3Playback() error {
 		return err
 	}
 
-	ctx, err := malgo.InitContext(nil, malgo.ContextConfig{}, func(message string) {
-		log.Printf("MALGO: %s", message)
+	otoCtx, ready, err := oto.NewContext(&oto.NewContextOptions{
+		SampleRate:   decoder.SampleRate(),
+		ChannelCount: 2,
+		Format:       oto.FormatSignedInt16LE,
+		BufferSize:   0, // Use driver's default buffer size
 	})
 	if err != nil {
 		return err
 	}
-	defer ctx.Uninit()
+	<-ready
 
-	deviceConfig := malgo.DefaultDeviceConfig(malgo.Playback)
-	deviceConfig.Playback.Format = malgo.FormatF32
-	deviceConfig.Playback.Channels = 2
-	deviceConfig.SampleRate = uint32(decoder.SampleRate())
+	player := otoCtx.NewPlayer(decoder)
+	defer player.Close()
 
-	audioData, err := io.ReadAll(decoder)
-	if err != nil {
-		return err
-	}
+	player.Play()
 
-	var audioIndex int
-	onData := func(outputSamples, inputSamples []byte, frameCount uint32) {
-		remaining := len(audioData) - audioIndex
-		if remaining <= 0 {
-			return
-		}
-
-		bytesPerFrame := 4 * 2
-		toCopy := int(frameCount) * bytesPerFrame
-		if toCopy > remaining {
-			toCopy = remaining
-		}
-
-		copy(outputSamples, audioData[audioIndex:audioIndex+toCopy])
-		audioIndex += toCopy
-	}
-
-	device, err := malgo.InitDevice(ctx.Context, deviceConfig, malgo.DeviceCallbacks{
-		Data: onData,
-	})
-	if err != nil {
-		return err
-	}
-	defer device.Uninit()
-
-	err = device.Start()
-	if err != nil {
-		return err
-	}
-
-	duration := time.Duration(float64(len(audioData)/(4*2)) / float64(decoder.SampleRate()) * float64(time.Second))
+	// Wait for the sound to finish
+	duration := time.Duration(float64(decoder.Length()) / float64(4*decoder.SampleRate()) * float64(time.Second))
 	time.Sleep(duration)
-
-	device.Stop()
 
 	return nil
 }
