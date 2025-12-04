@@ -74,21 +74,20 @@ Go Brew includes carefully crafted presets for different tea types:
 
 ## Screenshots
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                                                                             │
-│                     ⏰ Brewing...   02:15                                    │
-│                     [████████████░░░░░░░░] 60%                              │
-│                                                                             │
-│                     Controls:                                               │
-│                     s: Start timer                                          │
-│                     space: Pause/Resume                                     │
-│                     r: Reset timer                                          │
-│                     up/down: Select preset                                  │
-│                     q/ctrl+c: Quit                                          │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+### 🍵 Idle State
+*Application startup showing tea selection and ready to brew*
+
+![Idle State](assets/screenshots/idle-welcome.png)
+
+### ⏰ Brewing in Progress
+*Timer counting down with visual progress bar during brew cycle*
+
+![Brewing Progress](assets/screenshots/brewing-progress.png)
+
+### ✅ Tea Ready
+*Brewing complete with notification and timer finished state*
+
+![Timer Finished](assets/screenshots/timer-finished.png)
 
 ## Configuration
 
