@@ -27,7 +27,7 @@ go install github.com/Spectari-code/go-brew@latest
 ```
 
 #### Download Binary
-Download the appropriate binary for your platform from the [Releases](https://github.com/Spectari-code/go-brew/releases) page.
+Will implement releases at a future date.
 
 #### Build from Source
 ```bash
