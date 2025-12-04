@@ -1,0 +1,28 @@
+# Claude-specific
+.claude/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# IDE-specific
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts
+go-brew
+*.exe
+
+# Test coverage
+coverage.out
+coverage.html
+
+# Temporary files
+*.tmp
+*.temp
+
+# Go specific
+vendor/
+*.log
